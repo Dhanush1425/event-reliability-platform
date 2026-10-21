@@ -9,6 +9,11 @@ public record EventResponse(
         UUID id,
         String eventType,
         JsonNode payload,
-        Instant createdAt
+        Instant createdAt,
+        EventStatus status,
+        int attemptCount,
+        Instant nextAttemptAt,
+        String lastError,
+        Instant failedAt
 ) {}
 
