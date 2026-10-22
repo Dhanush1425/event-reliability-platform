@@ -11,6 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "events")
+@Data
 public class Event {
 
     @Id
@@ -27,6 +28,22 @@ public class Event {
     @Column(nullable = false)
     private Instant createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EventStatus status;
+
+    @Column(nullable = false)
+    private int attemptCount = 0;
+
+    @Column(nullable = false)
+    private Instant nextAttemptAt;
+
+    @Column(name = "last_error", columnDefinition = "TEXT")
+    private String lastError;
+
+    @Column(name = "failed_at")
+    private Instant failedAt;
+
     protected Event(){
     }
 
@@ -34,6 +51,7 @@ public class Event {
         this.eventType = eventType;
         this.payload = payload;
         this.createdAt = Instant.now();
+        this.status = EventStatus.PENDING;
     }
 
     public UUID getId() {
