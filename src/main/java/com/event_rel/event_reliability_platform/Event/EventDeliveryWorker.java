@@ -1,5 +1,6 @@
 package com.event_rel.event_reliability_platform.Event;
 
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +24,7 @@ public class EventDeliveryWorker {
 
         for (Event event : pendingEvents) {
             try {
-                event.setAttemptCount(event.getAttemptCount() + 1);
+//                event.setAttemptCount(event.getAttemptCount() + 1);
                 event.setStatus(EventStatus.PROCESSING);
                 eventRepository.save(event);
 
@@ -32,12 +33,31 @@ public class EventDeliveryWorker {
                         event.getEventType(),
                         event.getPayload()
                 );
+                event.setAttemptCount(event.getAttemptCount() + 1);
                 event.setStatus(EventStatus.DELIVERED);
                 eventRepository.save(event);
 
                 System.out.println("Event Delivered successfully: " + event.getId());
 
-            } catch (Exception exception) {
+            } catch (CallNotPermittedException exception) {
+
+                event.setStatus(EventStatus.PENDING);
+                event.setNextAttemptAt(
+                        java.time.Instant.now().plusSeconds(10)
+                );
+
+                eventRepository.save(event);
+
+                System.out.println(
+                        "Circuit breaker is OPEN. Delivery postponed: "
+                                + event.getId()
+                );
+
+            }
+            catch (Exception exception) {
+
+                event.setAttemptCount(event.getAttemptCount() + 1); // to count only the success and failed req not req to circuit breaker
+
                 if (event.getAttemptCount() < 3) {
                     long delaySeconds = event.getAttemptCount() == 1 ? 5 : 15;
                     event.setStatus(EventStatus.PENDING);
@@ -46,7 +66,7 @@ public class EventDeliveryWorker {
 
                     System.out.println("Event retry scheduled: "+ event.getId() + " in " + delaySeconds + " seconds");
                 } else {
-                    System.out.println("event entered");
+//                    System.out.println("event entered");
                     event.setStatus(EventStatus.DEAD_LETTER);
                     event.setLastError(exception.getMessage());
                     event.setFailedAt(java.time.Instant.now());

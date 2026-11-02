@@ -32,7 +32,7 @@ public class EventController {
 
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventResponse createEvent(@Valid  @RequestBody CreateEventRequest request){
+    public EventResponse createEvent(@Valid @RequestBody CreateEventRequest request){
         Event event = new Event(
                 request.eventType(),
                 request.payload()
