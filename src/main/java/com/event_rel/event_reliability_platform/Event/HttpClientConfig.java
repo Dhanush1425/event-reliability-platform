@@ -12,15 +12,20 @@ import java.time.Duration;
 public class HttpClientConfig {
 
     @Bean
-    public RestClient webhookRestClient(){
+    public RestClient webhookRestClient() {
 
-        HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).build();
+        HttpClient httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(3))
+                .build();
 
-        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
+        JdkClientHttpRequestFactory requestFactory =
+                new JdkClientHttpRequestFactory(httpClient);
 
         requestFactory.setReadTimeout(Duration.ofSeconds(5));
 
-
-        return RestClient.builder().baseUrl("http://localhost:8082").build();
+        return RestClient.builder()
+                .baseUrl("http://localhost:8082")
+                .requestFactory(requestFactory)
+                .build();
     }
 }

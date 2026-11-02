@@ -1,5 +1,6 @@
 package com.event_rel.event_reliability_platform.Event;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -14,6 +15,7 @@ public class WebhookDeliveryService {
         this.webhookRestClient = webhookRestClient;
     }
 
+    @CircuitBreaker(name = "webhookDelivery")
     public void deliverEvent(UUID eventId, String eventType, Object payload) {
         webhookRestClient.post()
                 .uri("/receiver/events")
