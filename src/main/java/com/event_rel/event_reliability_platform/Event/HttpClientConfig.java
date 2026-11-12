@@ -1,3 +1,4 @@
+
 package com.event_rel.event_reliability_platform.Event;
 
 import org.springframework.context.annotation.Bean;
@@ -12,7 +13,7 @@ import java.time.Duration;
 public class HttpClientConfig {
 
     @Bean
-    public RestClient webhookRestClient() {
+    public RestClient webhookRestClient(RestClient.Builder builder) {
 
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(3))
@@ -23,7 +24,7 @@ public class HttpClientConfig {
 
         requestFactory.setReadTimeout(Duration.ofSeconds(5));
 
-        return RestClient.builder()
+        return builder
                 .baseUrl("http://localhost:8082")
                 .requestFactory(requestFactory)
                 .build();
